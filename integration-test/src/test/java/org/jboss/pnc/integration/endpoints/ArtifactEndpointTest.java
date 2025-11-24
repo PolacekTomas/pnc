@@ -2,13 +2,13 @@
  * JBoss, Home of Professional Open Source.
  * Copyright 2014-2022 Red Hat, Inc., and individual contributors
  * as indicated by the @author tags.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import org.jboss.pnc.client.ArtifactClient;
 import org.jboss.pnc.client.ClientException;
 import org.jboss.pnc.client.RemoteCollection;
 import org.jboss.pnc.client.RemoteResourceException;
+import org.jboss.pnc.demo.data.DatabaseDataInitializer;
 import org.jboss.pnc.dto.Artifact;
 import org.jboss.pnc.dto.ArtifactRevision;
 import org.jboss.pnc.dto.Build;
@@ -39,6 +40,7 @@ import org.jboss.pnc.enums.BuildCategory;
 import org.jboss.pnc.enums.RepositoryType;
 import org.jboss.pnc.integration.setup.Deployments;
 import org.jboss.pnc.integration.setup.RestClientConfiguration;
+import org.jboss.pnc.rest.api.parameters.BuildsFilterParameters;
 import org.jboss.pnc.test.category.ContainerTest;
 import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
 import org.junit.Before;
@@ -320,9 +322,20 @@ public class ArtifactEndpointTest {
     public void shouldGetBuildsThatDependsOnArtifact() throws RemoteResourceException {
         ArtifactClient client = new ArtifactClient(RestClientConfiguration.asUser());
 
-        RemoteCollection<Build> builds = client.getDependantBuilds(artifactRest3.getId());
+        RemoteCollection<Build> builds = client.getDependantBuilds(artifactRest3.getId(), null);
 
         assertThat(builds).hasSize(3);
+    }
+
+    @Test
+    public void testDependantBuilds() throws RemoteResourceException {
+        ArtifactClient client = new ArtifactClient(RestClientConfiguration.asUser());
+
+        BuildsFilterParameters filter = new BuildsFilterParameters();
+        filter.setBuildConfigName(DatabaseDataInitializer.EAP_PROJECT_BUILD_CFG_ID);
+        RemoteCollection<Build> builds = client.getDependantBuilds(artifactRest3.getId(), filter);
+
+        assertThat(builds).hasSize(1);
     }
 
     @Test
